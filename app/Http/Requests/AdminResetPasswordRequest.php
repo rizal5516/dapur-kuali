@@ -24,6 +24,11 @@ class AdminResetPasswordRequest extends FormRequest
                 'confirmed',
                 PasswordRule::min(10)->letters()->mixedCase()->numbers()->symbols(),
             ],
+            'password_confirmation' => [
+                'required',
+                'string',
+                'same:password',
+            ],
         ];
     }
 
