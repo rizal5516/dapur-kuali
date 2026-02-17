@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\AdminLoginRequest;
@@ -74,7 +75,6 @@ class AuthController extends Controller
         try {
             $status = Password::broker('users')->sendResetLink(['email' => $email]);
         } catch (Exception $e) {
-            // Log error untuk debugging, tapi jangan expose ke user
             Log::error('Forgot password error', [
                 'email' => $email,
                 'error' => $e->getMessage(),
@@ -82,7 +82,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Selalu return success response (prevent user enumeration)
         return response()->json([
             'message' => 'Jika email terdaftar, kami sudah mengirim link reset password.',
         ], 200);
@@ -119,13 +118,11 @@ class AuthController extends Controller
                             'remember_token' => Str::random(60),
                         ])->save();
 
-                        // Invalidate all sessions - wrapped in try-catch
                         try {
                             DB::table('sessions')
                                 ->where('user_id', $user->id)
                                 ->delete();
                         } catch (Exception $e) {
-                            // Log tapi jangan stop process
                             Log::warning('Failed to delete sessions on password reset', [
                                 'user_id' => $user->id,
                                 'error' => $e->getMessage(),
@@ -141,7 +138,7 @@ class AuthController extends Controller
                             'trace' => $e->getTraceAsString(),
                         ]);
 
-                        throw $e; // Re-throw agar Laravel Password broker handle
+                        throw $e;
                     }
                 }
             );
@@ -159,14 +156,12 @@ class AuthController extends Controller
             ], 200);
 
         } catch (Exception $e) {
-            // Log technical error
             Log::error('Reset password error', [
                 'email' => $validated['email'],
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Return user-friendly error (tidak expose detail teknis)
             return response()->json([
                 'message' => 'Terjadi kesalahan saat mereset password. Silakan coba lagi atau hubungi administrator.',
             ], 500);
@@ -180,7 +175,19 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Logout berhasil.']);
+        $cookies = [  
+            'dapur-kuali-session',  
+            'XSRF-TOKEN',
+            'laravel_session',
+        ];
+
+        foreach ($request->cookies as $key => $value) {
+            Cookie::queue(Cookie::forget($key));
+        }
+
+        return response()->json([
+            'message' => 'Logout berhasil.'
+        ]);
     }
 
     private function getResetErrorMessage(string $status): string

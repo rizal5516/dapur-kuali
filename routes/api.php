@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Public\GalleryController;
 use App\Http\Controllers\Api\Public\WeddingReservationController;
 
 use App\Http\Controllers\Api\Admin\AuthController;
+use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\MenuCategoryAdminController;
 use App\Http\Controllers\Api\Admin\MenuItemAdminController;
 use App\Http\Controllers\Api\Admin\GalleryAdminController;
@@ -43,6 +44,10 @@ Route::prefix('admin')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:password-reset');
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:password-reset');
+
+        Route::post('/change-password', [AdminController::class, 'changePassword'])
+        ->middleware(['auth:sanctum', 'throttle:change-password'])
+        ->name('admin.change-password');
     });
 
     /**
