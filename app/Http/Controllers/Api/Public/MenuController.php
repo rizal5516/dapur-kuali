@@ -21,24 +21,24 @@ class MenuController extends Controller
             ->whereNull('deleted_at')
             ->orderBy('sort_order');
 
-        if (is_string($cuisine) && in_array($cuisine, ['sunda', 'betawi', 'minuman', 'lainnya'], true)) {
+        if (is_string($cuisine) && in_array($cuisine, ['makanan', 'minuman', 'dessert'], true)) {
             $categoriesQuery->where('cuisine_type', $cuisine);
         }
 
         $categories = $categoriesQuery
             ->with(['items' => function ($q) use ($featured) {
                 $q->select([
-                        'id',
-                        'menu_category_id',
-                        'name',
-                        'slug',
-                        'description',
-                        'price',
-                        'image_url',
-                        'is_featured',
-                        'is_available',
-                        'sort_order',
-                    ])
+                    'id',
+                    'menu_category_id',
+                    'name',
+                    'slug',
+                    'description',
+                    'price',
+                    'image_url',
+                    'is_featured',
+                    'is_available',
+                    'sort_order',
+                ])
                     ->where('is_available', true)
                     ->whereNull('deleted_at')
                     ->orderBy('sort_order');

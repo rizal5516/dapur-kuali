@@ -17,7 +17,7 @@ class StoreMenuCategoryRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:2', 'max:80'],
             'slug' => ['required', 'string', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:menu_categories,slug'],
-            'cuisine_type' => ['required', Rule::in(['sunda', 'betawi', 'minuman', 'lainnya'])],
+            'cuisine_type' => ['required', Rule::in(['makanan', 'minuman', 'dessert'])],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:1000000'],
             'is_active' => ['nullable', 'boolean'],
         ];

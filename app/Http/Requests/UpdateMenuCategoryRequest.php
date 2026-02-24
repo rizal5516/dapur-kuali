@@ -25,7 +25,7 @@ class UpdateMenuCategoryRequest extends FormRequest
                 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
                 Rule::unique('menu_categories', 'slug')->ignore($id),
             ],
-            'cuisine_type' => ['sometimes', Rule::in(['sunda', 'betawi', 'minuman', 'lainnya'])],
+            'cuisine_type' => ['sometimes', Rule::in(['makanan', 'minuman', 'dessert'])],
             'sort_order' => ['sometimes', 'integer', 'min:0', 'max:1000000'],
             'is_active' => ['sometimes', 'boolean'],
         ];
