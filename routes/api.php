@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 | Public Routes — No authentication required
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('public')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::get('/menu', [MenuController::class, 'index']);
@@ -34,8 +35,7 @@ Route::prefix('public')->group(function () {
 | Admin Routes — All session-based via web middleware (SPA Vue.js only)
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->middleware(['web'])->group(function () {
-
+Route::prefix('admin')->group(function () {
     /*
     | Auth — Guest only (login, forgot, reset tidak perlu sudah login)
     */
