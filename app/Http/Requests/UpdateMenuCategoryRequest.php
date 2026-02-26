@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\MenuCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,11 +15,12 @@ class UpdateMenuCategoryRequest extends FormRequest
 
     public function rules(): array
     {
-        $id = (int) $this->route('menu_category');
+        $menuCategory = $this->route('menu_category');
+        $id = $menuCategory instanceof MenuCategory ? $menuCategory->id : (int) $menuCategory;
 
         return [
-            'name' => ['sometimes', 'string', 'min:2', 'max:80'],
-            'slug' => [
+            'name'         => ['sometimes', 'string', 'min:2', 'max:80'],
+            'slug'         => [
                 'sometimes',
                 'string',
                 'max:120',
@@ -26,8 +28,8 @@ class UpdateMenuCategoryRequest extends FormRequest
                 Rule::unique('menu_categories', 'slug')->ignore($id),
             ],
             'cuisine_type' => ['sometimes', Rule::in(['makanan', 'minuman', 'dessert'])],
-            'sort_order' => ['sometimes', 'integer', 'min:0', 'max:1000000'],
-            'is_active' => ['sometimes', 'boolean'],
+            'sort_order'   => ['sometimes', 'integer', 'min:0', 'max:1000000'],
+            'is_active'    => ['sometimes', 'boolean'],
         ];
     }
 
