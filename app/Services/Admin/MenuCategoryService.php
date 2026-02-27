@@ -11,7 +11,7 @@ class MenuCategoryService
     private const ALLOWED_SORT_COLUMNS = ['name', 'sort_order', 'created_at'];
     private const ALLOWED_SORT_DIRS    = ['asc', 'desc'];
     private const PER_PAGE_MAX         = 100;
-    private const PER_PAGE_DEFAULT     = 20;
+    private const PER_PAGE_DEFAULT     = 10;
 
     public function paginate(array $filters): LengthAwarePaginator
     {
