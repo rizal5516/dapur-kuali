@@ -34,6 +34,13 @@ class MenuItemService
                 isset($filters['search']) && filled($filters['search']),
                 fn($q) => $q->where('name', 'like', '%' . str($filters['search'])->limit(100) . '%')
             )
+            ->when(                                                          // ← TAMBAHKAN BLOK INI
+                isset($filters['cuisine_type']) && filled($filters['cuisine_type']),
+                fn($q) => $q->whereHas(
+                    'category',
+                    fn($cat) => $cat->where('cuisine_type', $filters['cuisine_type'])
+                )
+            )
             ->when(
                 isset($filters['menu_category_id']),
                 fn($q) => $q->where('menu_category_id', (int) $filters['menu_category_id'])

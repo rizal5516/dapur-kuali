@@ -15,13 +15,15 @@ class IndexMenuItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'search'             => ['sometimes', 'nullable', 'string', 'max:100'],
-            'menu_category_id'   => ['sometimes', 'nullable', 'integer', 'exists:menu_categories,id'],
-            'is_available'       => ['sometimes', 'nullable', 'boolean'],
-            'is_featured'        => ['sometimes', 'nullable', 'boolean'],
-            'sort_by'            => ['sometimes', Rule::in(['name', 'price', 'sort_order', 'created_at'])],
-            'sort_dir'           => ['sometimes', Rule::in(['asc', 'desc'])],
-            'per_page'           => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'search'           => ['sometimes', 'string', 'max:100'],
+            'cuisine_type'     => ['sometimes', 'string', 'in:makanan,minuman,dessert'], // ← TAMBAHKAN INI
+            'menu_category_id' => ['sometimes', 'integer', 'exists:menu_categories,id'],
+            'is_available'     => ['sometimes', 'boolean'],
+            'is_featured'      => ['sometimes', 'boolean'],
+            'sort_by'          => ['sometimes', 'string', 'in:name,price,sort_order,created_at'],
+            'sort_dir'         => ['sometimes', 'string', 'in:asc,desc'],
+            'per_page'         => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'page'             => ['sometimes', 'integer', 'min:1'],
         ];
     }
 }
