@@ -15,24 +15,48 @@ class MenuCategoryService
 
     public function paginate(array $filters): LengthAwarePaginator
     {
-        $perPage  = min((int) Arr::get($filters, 'per_page', self::PER_PAGE_DEFAULT), self::PER_PAGE_MAX);
-        $sortBy   = in_array($filters['sort_by'] ?? '', self::ALLOWED_SORT_COLUMNS, true)
+        $perPage = min(
+            (int) Arr::get($filters, 'per_page', self::PER_PAGE_DEFAULT),
+            self::PER_PAGE_MAX,
+        );
+
+        $sortBy = in_array($filters['sort_by'] ?? '', self::ALLOWED_SORT_COLUMNS, true)
             ? $filters['sort_by']
             : 'sort_order';
-        $sortDir  = in_array($filters['sort_dir'] ?? '', self::ALLOWED_SORT_DIRS, true)
+
+        $sortDir = in_array($filters['sort_dir'] ?? '', self::ALLOWED_SORT_DIRS, true)
             ? $filters['sort_dir']
             : 'asc';
 
         return MenuCategory::query()
             ->when(
-                isset($filters['search']) && filled($filters['search']),
-                fn($q) => $q->where('name', 'like', '%' . str($filters['search'])->limit(100) . '%')
+                filled(Arr::get($filters, 'search')),
+                fn($q) => $q->where('name', 'like', '%' . Arr::get($filters, 'search') . '%')
             )
             ->when(
-                isset($filters['is_active']),
-                fn($q) => $q->where('is_active', filter_var($filters['is_active'], FILTER_VALIDATE_BOOLEAN))
+                Arr::has($filters, 'is_active'),
+                fn($q) => $q->where('is_active', (bool) $filters['is_active'])
             )
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage);
+    }
+
+    public function create(array $validated, int $createdBy): MenuCategory
+    {
+        return MenuCategory::query()->create(
+            array_merge($validated, ['created_by' => $createdBy])
+        );
+    }
+
+    public function update(MenuCategory $menuCategory, array $validated): MenuCategory
+    {
+        $menuCategory->update($validated);
+
+        return $menuCategory->fresh();
+    }
+
+    public function delete(MenuCategory $menuCategory): void
+    {
+        $menuCategory->delete();
     }
 }

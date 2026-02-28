@@ -25,9 +25,7 @@ class MenuCategoryAdminController extends Controller
 
     public function store(StoreMenuCategoryRequest $request): JsonResponse
     {
-        $data = array_merge($request->validated(), ['created_by' => $request->user()->id]);
-
-        $category = MenuCategory::query()->create($data);
+        $category = $this->service->create($request->validated(), $request->user()->id);
 
         return (new MenuCategoryResource($category))
             ->additional(['message' => 'Kategori berhasil dibuat.'])
@@ -37,16 +35,16 @@ class MenuCategoryAdminController extends Controller
 
     public function update(UpdateMenuCategoryRequest $request, MenuCategory $menu_category): JsonResponse
     {
-        $menu_category->update($request->validated());
+        $category = $this->service->update($menu_category, $request->validated());
 
-        return (new MenuCategoryResource($menu_category->fresh()))
+        return (new MenuCategoryResource($category))
             ->additional(['message' => 'Kategori berhasil diperbarui.'])
             ->response();
     }
 
     public function destroy(MenuCategory $menu_category): JsonResponse
     {
-        $menu_category->delete();
+        $this->service->delete($menu_category);
 
         return response()->json(['message' => 'Kategori berhasil dihapus.']);
     }

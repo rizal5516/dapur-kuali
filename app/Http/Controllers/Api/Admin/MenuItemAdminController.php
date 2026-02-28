@@ -25,9 +25,7 @@ class MenuItemAdminController extends Controller
 
     public function store(StoreMenuItemRequest $request): JsonResponse
     {
-        $data = array_merge($request->validated(), ['created_by' => $request->user()->id]);
-
-        $item = MenuItem::query()->create($data);
+        $item = $this->service->create($request->validated(), $request->user()->id);
 
         return (new MenuItemResource($item->load('category')))
             ->additional(['message' => 'Menu item berhasil dibuat.'])
@@ -37,16 +35,16 @@ class MenuItemAdminController extends Controller
 
     public function update(UpdateMenuItemRequest $request, MenuItem $menu_item): JsonResponse
     {
-        $menu_item->update($request->validated());
+        $item = $this->service->update($menu_item, $request->validated());
 
-        return (new MenuItemResource($menu_item->fresh('category')))
+        return (new MenuItemResource($item))
             ->additional(['message' => 'Menu item berhasil diperbarui.'])
             ->response();
     }
 
     public function destroy(MenuItem $menu_item): JsonResponse
     {
-        $menu_item->delete();
+        $this->service->delete($menu_item);
 
         return response()->json(['message' => 'Menu item berhasil dihapus.']);
     }

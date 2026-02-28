@@ -31,29 +31,48 @@ class MenuItemService
         return MenuItem::query()
             ->with(['category:id,name,slug,cuisine_type'])
             ->when(
-                isset($filters['search']) && filled($filters['search']),
-                fn($q) => $q->where('name', 'like', '%' . str($filters['search'])->limit(100) . '%')
+                filled(Arr::get($filters, 'search')),
+                fn($q) => $q->where('name', 'like', '%' . Arr::get($filters, 'search') . '%')
             )
-            ->when(                                                          // ← TAMBAHKAN BLOK INI
-                isset($filters['cuisine_type']) && filled($filters['cuisine_type']),
+            ->when(
+                filled(Arr::get($filters, 'cuisine_type')),
                 fn($q) => $q->whereHas(
                     'category',
                     fn($cat) => $cat->where('cuisine_type', $filters['cuisine_type'])
                 )
             )
             ->when(
-                isset($filters['menu_category_id']),
+                (int) Arr::get($filters, 'menu_category_id', 0) > 0,
                 fn($q) => $q->where('menu_category_id', (int) $filters['menu_category_id'])
             )
             ->when(
-                isset($filters['is_available']),
-                fn($q) => $q->where('is_available', filter_var($filters['is_available'], FILTER_VALIDATE_BOOLEAN))
+                Arr::has($filters, 'is_available'),
+                fn($q) => $q->where('is_available', (bool) $filters['is_available'])
             )
             ->when(
-                isset($filters['is_featured']),
-                fn($q) => $q->where('is_featured', filter_var($filters['is_featured'], FILTER_VALIDATE_BOOLEAN))
+                Arr::has($filters, 'is_featured'),
+                fn($q) => $q->where('is_featured', (bool) $filters['is_featured'])
             )
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage);
+    }
+
+    public function create(array $validated, int $createdBy): MenuItem
+    {
+        return MenuItem::query()->create(
+            array_merge($validated, ['created_by' => $createdBy])
+        );
+    }
+
+    public function update(MenuItem $menuItem, array $validated): MenuItem
+    {
+        $menuItem->update($validated);
+
+        return $menuItem->fresh('category');
+    }
+
+    public function delete(MenuItem $menuItem): void
+    {
+        $menuItem->delete();
     }
 }
