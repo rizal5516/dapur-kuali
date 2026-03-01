@@ -23,4 +23,13 @@ class IndexMenuCategoryRequest extends FormRequest
             'per_page'     => ['sometimes', 'integer', 'min:1', 'max:100'],
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('is_active')) {
+            $this->merge([
+                'is_active' => filter_var($this->input('is_active'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+            ]);
+        }
+    }
 }

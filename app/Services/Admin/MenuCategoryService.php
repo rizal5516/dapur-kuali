@@ -37,6 +37,10 @@ class MenuCategoryService
                 Arr::has($filters, 'is_active'),
                 fn($q) => $q->where('is_active', (bool) $filters['is_active'])
             )
+            ->when(
+                filled(Arr::get($filters, 'cuisine_type')),
+                fn($q) => $q->where('cuisine_type', $filters['cuisine_type'])
+            )
             ->orderBy($sortBy, $sortDir)
             ->paginate($perPage);
     }
