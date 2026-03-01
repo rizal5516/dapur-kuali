@@ -20,7 +20,7 @@ class StoreMenuItemRequest extends FormRequest
             'slug' => ['required', 'string', 'max:150', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:menu_items,slug'],
             'description' => ['nullable', 'string', 'max:2000'],
             'price' => ['required', 'integer', 'min:0', 'max:100000000'],
-            'image_url' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
             'is_featured' => ['nullable', 'boolean'],
             'is_available' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:1000000'],

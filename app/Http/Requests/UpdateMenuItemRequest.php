@@ -30,7 +30,7 @@ class UpdateMenuItemRequest extends FormRequest
             ],
             'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
             'price' => ['sometimes', 'integer', 'min:0', 'max:100000000'],
-            'image_url' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'image' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
             'is_featured' => ['sometimes', 'boolean'],
             'is_available' => ['sometimes', 'boolean'],
             'sort_order' => ['sometimes', 'integer', 'min:0', 'max:1000000'],

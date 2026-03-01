@@ -5,6 +5,8 @@ namespace App\Services\Admin;
 use App\Models\MenuItem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class MenuItemService
 {
@@ -59,6 +61,11 @@ class MenuItemService
 
     public function create(array $validated, int $createdBy): MenuItem
     {
+        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
+            $data['image_url'] = $data['image']->store('menu-items', 'public');
+            unset($data['image']);
+        }
+
         return MenuItem::query()->create(
             array_merge($validated, ['created_by' => $createdBy])
         );
@@ -67,6 +74,14 @@ class MenuItemService
     public function update(MenuItem $menuItem, array $validated): MenuItem
     {
         $menuItem->update($validated);
+
+        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
+            if ($menuItem->image_url) {
+                Storage::disk('public')->delete($menuItem->image_url);
+            }
+            $data['image_url'] = $data['image']->store('menu-items', 'public');
+            unset($data['image']);
+        }
 
         return $menuItem->fresh('category');
     }
