@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class IndexMenuItemRequest extends FormRequest
 {
@@ -25,5 +24,21 @@ class IndexMenuItemRequest extends FormRequest
             'per_page'         => ['sometimes', 'integer', 'min:1', 'max:100'],
             'page'             => ['sometimes', 'integer', 'min:1'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $booleanFields = ['is_available', 'is_featured'];
+
+        $casts = [];
+        foreach ($booleanFields as $field) {
+            if ($this->has($field)) {
+                $casts[$field] = filter_var($this->input($field), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            }
+        }
+
+        if (!empty($casts)) {
+            $this->merge($casts);
+        }
     }
 }

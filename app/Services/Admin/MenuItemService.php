@@ -46,11 +46,11 @@ class MenuItemService
                 fn($q) => $q->where('menu_category_id', (int) $filters['menu_category_id'])
             )
             ->when(
-                Arr::has($filters, 'is_available'),
+                array_key_exists('is_available', $filters) && $filters['is_available'] !== null,
                 fn($q) => $q->where('is_available', (bool) $filters['is_available'])
             )
             ->when(
-                Arr::has($filters, 'is_featured'),
+                array_key_exists('is_featured', $filters) && $filters['is_featured'] !== null,
                 fn($q) => $q->where('is_featured', (bool) $filters['is_featured'])
             )
             ->orderBy($sortBy, $sortDir)
