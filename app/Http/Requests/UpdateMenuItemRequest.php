@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\MenuItem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,7 +15,8 @@ class UpdateMenuItemRequest extends FormRequest
 
     public function rules(): array
     {
-        $id = (int) $this->route('menu_item');
+        $menuItem = $this->route('menu_item');
+        $id = $menuItem instanceof MenuItem ? $menuItem->id : (int) $menuItem;
 
         return [
             'menu_category_id' => ['sometimes', 'integer', 'exists:menu_categories,id'],
