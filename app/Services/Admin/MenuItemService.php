@@ -71,11 +71,15 @@ class MenuItemService
         $newImageUrl = $this->storeImage($validated);
 
         if ($newImageUrl !== null) {
+
             $this->deleteOldImage($menuItem->image_url);
             $validated['image_url'] = $newImageUrl;
+        } elseif (!empty($validated['remove_image'])) {
+            $this->deleteOldImage($menuItem->image_url);
+            $validated['image_url'] = null;
         }
 
-        unset($validated['image']);
+        unset($validated['image'], $validated['remove_image']);
 
         $menuItem->update($validated);
 
