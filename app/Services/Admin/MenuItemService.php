@@ -3,24 +3,20 @@
 namespace App\Services\Admin;
 
 use App\Models\MenuItem;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Arr;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 
 class MenuItemService
 {
     private const ALLOWED_SORT_COLUMNS = ['name', 'price', 'sort_order', 'created_at'];
     private const ALLOWED_SORT_DIRS    = ['asc', 'desc'];
-    private const PER_PAGE_MAX         = 100;
-    private const PER_PAGE_DEFAULT     = 20;
+    private const IMAGE_DISK           = 'public';
+    private const IMAGE_FOLDER         = 'menu-items';
 
-    public function paginate(array $filters): LengthAwarePaginator
+    public function paginate(array $filters = [])
     {
-        $perPage = min(
-            (int) Arr::get($filters, 'per_page', self::PER_PAGE_DEFAULT),
-            self::PER_PAGE_MAX,
-        );
+        $perPage = min((int) Arr::get($filters, 'per_page', 15), 100);
 
         $sortBy = in_array($filters['sort_by'] ?? '', self::ALLOWED_SORT_COLUMNS, true)
             ? $filters['sort_by']
@@ -61,10 +57,9 @@ class MenuItemService
 
     public function create(array $validated, int $createdBy): MenuItem
     {
-        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
-            $data['image_url'] = $data['image']->store('menu-items', 'public');
-            unset($data['image']);
-        }
+        $validated['image_url'] = $this->storeImage($validated);
+
+        unset($validated['image']);
 
         return MenuItem::query()->create(
             array_merge($validated, ['created_by' => $createdBy])
@@ -73,21 +68,38 @@ class MenuItemService
 
     public function update(MenuItem $menuItem, array $validated): MenuItem
     {
-        $menuItem->update($validated);
+        $newImageUrl = $this->storeImage($validated);
 
-        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
-            if ($menuItem->image_url) {
-                Storage::disk('public')->delete($menuItem->image_url);
-            }
-            $data['image_url'] = $data['image']->store('menu-items', 'public');
-            unset($data['image']);
+        if ($newImageUrl !== null) {
+            $this->deleteOldImage($menuItem->image_url);
+            $validated['image_url'] = $newImageUrl;
         }
+
+        unset($validated['image']);
+
+        $menuItem->update($validated);
 
         return $menuItem->fresh('category');
     }
 
     public function delete(MenuItem $menuItem): void
     {
+        $this->deleteOldImage($menuItem->image_url);
         $menuItem->delete();
+    }
+
+    private function storeImage(array $data): ?string
+    {
+        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
+            return $data['image']->store(self::IMAGE_FOLDER, self::IMAGE_DISK);
+        }
+        return null;
+    }
+
+    private function deleteOldImage(?string $imagePath): void
+    {
+        if (filled($imagePath) && !str_starts_with($imagePath, 'http')) {
+            Storage::disk(self::IMAGE_DISK)->delete($imagePath);
+        }
     }
 }

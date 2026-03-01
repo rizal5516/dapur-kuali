@@ -16,7 +16,7 @@ class MenuItemResource extends JsonResource
             'slug'           => $this->slug,
             'description'    => $this->description,
             'price'          => (int) $this->price,
-            'imageUrl'       => $this->image_url,
+            'imageUrl'       => $this->resolveImageUrl(),
             'isFeatured'     => (bool) $this->is_featured,
             'isAvailable'    => (bool) $this->is_available,
             'sortOrder'      => (int) $this->sort_order,
@@ -29,5 +29,18 @@ class MenuItemResource extends JsonResource
                 'cuisineType' => $this->category->cuisine_type,
             ]),
         ];
+    }
+
+    private function resolveImageUrl(): ?string
+    {
+        if (blank($this->image_url)) {
+            return null;
+        }
+
+        if (str_starts_with($this->image_url, 'http')) {
+            return $this->image_url;
+        }
+
+        return rtrim(config('app.url'), '/') . '/storage/' . ltrim($this->image_url, '/');
     }
 }
