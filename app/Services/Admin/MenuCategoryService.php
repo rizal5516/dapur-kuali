@@ -29,6 +29,7 @@ class MenuCategoryService
             : 'asc';
 
         return MenuCategory::query()
+            ->with(['items:id,menu_category_id,image_url,sort_order'])
             ->when(
                 filled(Arr::get($filters, 'search')),
                 fn($q) => $q->where('name', 'like', '%' . Arr::get($filters, 'search') . '%')

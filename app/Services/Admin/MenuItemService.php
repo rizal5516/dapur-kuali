@@ -28,6 +28,7 @@ class MenuItemService
 
         return MenuItem::query()
             ->with(['category:id,name,slug,cuisine_type'])
+            ->whereHas('category', fn($q) => $q->where('is_active', true))
             ->when(
                 filled(Arr::get($filters, 'search')),
                 fn($q) => $q->where('name', 'like', '%' . Arr::get($filters, 'search') . '%')
@@ -36,7 +37,9 @@ class MenuItemService
                 filled(Arr::get($filters, 'cuisine_type')),
                 fn($q) => $q->whereHas(
                     'category',
-                    fn($cat) => $cat->where('cuisine_type', $filters['cuisine_type'])
+                    fn($cat) => $cat
+                        ->where('cuisine_type', $filters['cuisine_type'])
+                        ->where('is_active', true)
                 )
             )
             ->when(

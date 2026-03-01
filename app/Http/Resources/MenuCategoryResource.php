@@ -19,6 +19,25 @@ class MenuCategoryResource extends JsonResource
             'sortOrder'   => $this->sort_order,
             'createdAt'   => $this->created_at?->toISOString(),
             'updatedAt'   => $this->updated_at?->toISOString(),
+            'previewImages' => $this->whenLoaded(
+                'items',
+                fn() =>
+                $this->items
+                    ->whereNotNull('image_url')
+                    ->sortBy('sort_order')
+                    ->take(3)
+                    ->values()
+                    ->map(fn($item) => $this->resolveImageUrl($item->image_url))
+                    ->all()
+            ),
         ];
+    }
+
+    private function resolveImageUrl(?string $imagePath): ?string
+    {
+        if (blank($imagePath)) return null;
+        if (str_starts_with($imagePath, 'http')) return $imagePath;
+
+        return rtrim(config('app.url'), '/') . '/storage/' . ltrim($imagePath, '/');
     }
 }
